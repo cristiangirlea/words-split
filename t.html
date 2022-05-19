@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        label {
+            display: block;
+            width: auto;
+            text-align: left;
+            color: teal;
+            font-weight: 500;
+        }
+
+        form {
+            display: block;
+            margin-top: 10px;
+        }
+
+        textarea {
+            margin-top: 10px;
+            display: block;
+            width: 800px;
+            height: 200px;
+            text-align: left;
+            color: teal;
+            font-weight: 500;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+
+    function processText(text) {
+        const letters = [...Array(26)].map((_, y) => String.fromCharCode(y + 97));
+        let paragraphs = text.split(/\n/);
+        let content = {};
+        paragraphs.map((element, index) => {
+            let list = element.toLowerCase().match(/[\w+](?:\w+|[\w+.]*[\w+.])?/g);
+            if(Array.isArray(list) && list.length) {
+                list.sort().map((el) => {
+                    if (content[el]) {
+                        content[el] = {
+                            name: el,
+                            count: content[el]['count'] + 1,
+                            location: content[el]['location'] + ',' + (index + 1)
+                        }
+                    } else {
+                        content[el] = {
+                            name: el,
+                            count: 1,
+                            location: index + 1
+                        }
+                    }
+                })
+            }
+        });
+
+        let ol = document.getElementById("ol");
+        if(ol){
+            ol.remove()
+        }
+
+        ol = document.createElement("ol");
+        ol.setAttribute('type', "a");
+        ol.setAttribute('id','ol');
+        let li;
+        Object.keys(content).sort().map((key) => {
+            li = document.createElement("li");
+            li.innerHTML = content[key].name + ' {' + content[key].count + ':' + content[key].location + '}';
+            ol.appendChild(li);
+        });
+        document.body.appendChild(ol);
+    }
+
+    function submitToProcess() {
+        let form = document.querySelector('form');
+        let data = serializeForm(form);
+        processText(data['text']);
+    }
+
+    function serializeForm(form) {
+        let obj = {};
+        let formData = new FormData(form);
+        for (let key of formData.keys()) {
+            obj[key] = formData.get(key);
+        }
+        return obj;
+    }
+
+    function createForm() {
+        const f = document.createElement("form");
+        f.setAttribute('method', "post");
+
+        const textLabel = document.createElement("Label");
+        textLabel.setAttribute("for", 'text');
+        textLabel.innerHTML = "Here goes the text";
+        f.appendChild(textLabel);
+
+        const textarea = document.createElement("textarea");
+        textarea.setAttribute('type', "text");
+        textarea.setAttribute('name', "text");
+        textarea.innerHTML = "Given an arbitrary text document written in English, write a program that will generate a concordance, i.e. an alphabetical list of all word occurrences, labeled with word frequencies.\n" +
+            "Bonus: label each word with the sentence numbers in which each occurrence appeared.";
+        textarea.setAttribute('id', "text");
+        textarea.setAttribute('col', "50");
+        textarea.setAttribute('rows', "10");
+        f.appendChild(textarea);
+
+        const btn = document.createElement("button");
+        btn.setAttribute('type', "submit");
+        btn.innerHTML = "Process";
+
+        btn.addEventListener('click', function handleClick(e) {
+            e.preventDefault();
+            submitToProcess();
+        });
+        f.appendChild(btn);
+        document.body.appendChild(f);
+
+    }
+
+    createForm();
+</script>
+</html>
